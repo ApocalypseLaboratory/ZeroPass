@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace ZeroPass
+namespace ZeroPass.StateMachine
 {
     public interface IStateMachineTarget
     {

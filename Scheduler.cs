@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine.Profiling;
 using UnityEngine;
-using ZeroPass;
 
 namespace ZeroPass
 {
@@ -35,9 +29,9 @@ namespace ZeroPass
             return new SchedulerHandle(this, entry);
         }
 
-        private SchedulerHandle Schedule(string name, float time, float time_interval, Action<object> callback, object callback_data, GameObject profiler_obj)
+        private SchedulerHandle Schedule(string name, float time, float time_interval, Action<object> callback, object callback_data)
         {
-            SchedulerEntry entry = new SchedulerEntry(name, time + clock.GetTime(), time_interval, callback, callback_data, profiler_obj);
+            SchedulerEntry entry = new SchedulerEntry(name, time + clock.GetTime(), time_interval, callback, callback_data);
             return Schedule(entry);
         }
 
@@ -60,7 +54,7 @@ namespace ZeroPass
             {
                 Debug.LogError("Scheduler group mismatch!");
             }
-            SchedulerHandle schedulerHandle = Schedule(name, time, -1f, callback, callback_data, null);
+            SchedulerHandle schedulerHandle = Schedule(name, time, -1f, callback, callback_data);
             group?.Add(schedulerHandle);
             return schedulerHandle;
         }
@@ -76,23 +70,20 @@ namespace ZeroPass
             {
                 int count = Count;
                 int i = 0;
-                using (new KProfiler.Region("Scheduler.Update", null))
+                float time = clock.GetTime();
+                if (previousTime != time)
                 {
-                    float time = clock.GetTime();
-                    if (previousTime != time)
+                    previousTime = time;
+                    for (; i < count; i++)
                     {
-                        previousTime = time;
-                        for (; i < count; i++)
+                        if (!(time >= entries.Peek().Key))
                         {
-                            if (!(time >= entries.Peek().Key))
-                            {
-                                break;
-                            }
-                            SchedulerEntry value = entries.Dequeue().Value;
-                            if (value.callback != null)
-                            {
-                                value.callback(value.callbackData);
-                            }
+                            break;
+                        }
+                        SchedulerEntry value = entries.Dequeue().Value;
+                        if (value.callback != null)
+                        {
+                            value.callback(value.callbackData);
                         }
                     }
                 }

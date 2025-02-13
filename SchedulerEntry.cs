@@ -17,7 +17,7 @@ namespace ZeroPass
 
             public float timeInterval;
 
-            public Details(string name, Action<object> callback, object callback_data, float time_interval, GameObject profiler_obj)
+            public Details(string name, Action<object> callback, object callback_data, float time_interval)
             {
                 timeInterval = time_interval;
                 this.callback = callback;
@@ -39,10 +39,10 @@ namespace ZeroPass
 
         public float timeInterval => details.timeInterval;
 
-        public SchedulerEntry(string name, float time, float time_interval, Action<object> callback, object callback_data, GameObject profiler_obj)
+        public SchedulerEntry(string name, float time, float time_interval, Action<object> callback, object callback_data)
         {
             this.time = time;
-            details = new Details(name, callback, callback_data, time_interval, profiler_obj);
+            details = new Details(name, callback, callback_data, time_interval);
         }
 
         public void FreeResources()

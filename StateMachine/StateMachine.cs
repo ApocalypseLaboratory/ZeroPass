@@ -1,7 +1,14 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using UnityEditor.Rendering.Universal.Internal;
 using UnityEngine;
+using ZeroPass.Serialize;
 
-namespace ZeroPass
+namespace ZeroPass.StateMachine
 {
     public abstract class StateMachine
     {
@@ -34,15 +41,14 @@ namespace ZeroPass
             }
         }
 
-        public class Category : Resource
-        {
-            public Category(string id)
-                : base(id, null, null)
-            {
-            }
-        }
-
-        [SerializationConfig(MemberSerialization.OptIn)]
+        // public class Category : Resource
+        // {
+        //     public Category(string id)
+        //         : base(id, null, null)
+        //     {
+        //     }
+        // }
+        
         public abstract class Instance
         {
             public struct UpdateTableEntry
@@ -51,8 +57,6 @@ namespace ZeroPass
 
                 public StateMachineUpdater.BaseUpdateBucket bucket;
             }
-
-            protected LoggerFSSSS log;
 
             protected Status status;
 
@@ -93,7 +97,6 @@ namespace ZeroPass
             {
                 stateMachine = state_machine;
                 CreateParameterContexts();
-                log = new LoggerFSSSS(stateMachine.name, 35);
             }
 
             public abstract BaseState GetCurrentState();
@@ -155,11 +158,6 @@ namespace ZeroPass
                 return breakOnGoTo || stateMachine.debugSettings.breakOnGoTo;
             }
 
-            public LoggerFSSSS GetLog()
-            {
-                return log;
-            }
-
             public Parameter.Context[] GetParameterContexts()
             {
                 return parameterContexts;
@@ -186,7 +184,6 @@ namespace ZeroPass
                 {
                     isCrashed = true;
                     error = true;
-                    RestartWarning.ShouldWarn = true;
                 }
             }
 
