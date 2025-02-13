@@ -1,4 +1,4 @@
-namespace ZeroPass.Serialize
+namespace ZeroPass.Serialization
 {
     public interface IReader
     {

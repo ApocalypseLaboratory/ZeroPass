@@ -27,7 +27,7 @@ namespace ZeroPass
         }
         public new Transform transform => base.transform;
         public bool isNull => (UnityEngine.Object)this == (UnityEngine.Object)null;
-        
+
         public void Awake()
         {
             if (!App.IsExiting)
@@ -62,7 +62,7 @@ namespace ZeroPass
                 }
             }
         }
-        
+
         private void OnEnable()
         {
             if (!App.IsExiting)
@@ -78,12 +78,12 @@ namespace ZeroPass
                 OnCmpDisable();
             }
         }
-        
+
         public bool IsInitialized()
         {
             return isInitialized;
         }
-        
+
         public void OnDestroy()
         {
             OnForcedCleanUp();
@@ -111,7 +111,7 @@ namespace ZeroPass
                 Spawn();
             }
         }
-        
+
         public void Spawn()
         {
             if (!isSpawned)
@@ -168,7 +168,7 @@ namespace ZeroPass
         public virtual void CreateDef()
         {
         }
-        
+
         public T FindOrAdd<T>() where T : RMonoBehaviour
         {
             return this.FindOrAddComponent<T>();

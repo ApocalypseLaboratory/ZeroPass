@@ -6,7 +6,8 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor.Rendering.Universal.Internal;
 using UnityEngine;
-using ZeroPass.Serialize;
+using ZeroPass.Serialization;
+using YamlDotNet.Core.Tokens;
 
 namespace ZeroPass.StateMachine
 {
@@ -48,7 +49,7 @@ namespace ZeroPass.StateMachine
         //     {
         //     }
         // }
-        
+
         public abstract class Instance
         {
             public struct UpdateTableEntry
@@ -216,7 +217,7 @@ namespace ZeroPass.StateMachine
 
             public bool HasTag(Tag tag)
             {
-                return GetComponent<KPrefabID>().HasTag(tag);
+                return GetComponent<RPrefabID>().HasTag(tag);
             }
 
             public bool IsInsideState(BaseState state)
@@ -260,7 +261,7 @@ namespace ZeroPass.StateMachine
 
             public void Trigger(int hash, object data = null)
             {
-                GetMaster().GetComponent<KPrefabID>().Trigger(hash, data);
+                GetMaster().GetComponent<RPrefabID>().Trigger(hash, data);
             }
 
             public ComponentType Get<ComponentType>()
@@ -821,7 +822,7 @@ namespace ZeroPass.StateMachine
                                 IStateMachineTarget master = GetMaster();
                                 if (!master.isNull)
                                 {
-                                    KPrefabID component = master.GetComponent<KPrefabID>();
+                                    RPrefabID component = master.GetComponent<RPrefabID>();
                                     text = ((!((UnityEngine.Object)component != (UnityEngine.Object)null)) ? ("(" + base.gameObject.name + ").") : ("(" + component.PrefabTag.ToString() + ")."));
                                 }
                                 string[] obj = new string[7]
@@ -1477,7 +1478,7 @@ namespace ZeroPass.StateMachine
                             str = value.Guid.Guid;
                         }
                     }
-                    writer.WriteKleiString(str);
+                    writer.WriteRString(str);
                 }
 
                 public override void Deserialize(IReader reader)
@@ -1565,7 +1566,7 @@ namespace ZeroPass.StateMachine
                     base.Cleanup();
                     if ((UnityEngine.Object)value != (UnityEngine.Object)null)
                     {
-                        value.GetComponent<KMonoBehaviour>().Unsubscribe(objectDestroyedHandler);
+                        value.GetComponent<RMonoBehaviour>().Unsubscribe(objectDestroyedHandler);
                         objectDestroyedHandler = 0;
                     }
                 }
@@ -1575,12 +1576,12 @@ namespace ZeroPass.StateMachine
                     this.smi = smi;
                     if ((UnityEngine.Object)base.value != (UnityEngine.Object)null)
                     {
-                        base.value.GetComponent<KMonoBehaviour>().Unsubscribe(objectDestroyedHandler);
+                        base.value.GetComponent<RMonoBehaviour>().Unsubscribe(objectDestroyedHandler);
                         objectDestroyedHandler = 0;
                     }
                     if ((UnityEngine.Object)value != (UnityEngine.Object)null)
                     {
-                        objectDestroyedHandler = value.GetComponent<KMonoBehaviour>().Subscribe(1969584890, OnObjectDestroyed);
+                        objectDestroyedHandler = value.GetComponent<RMonoBehaviour>().Subscribe(1969584890, OnObjectDestroyed);
                     }
                     base.Set(value, smi);
                 }
@@ -1636,7 +1637,7 @@ namespace ZeroPass.StateMachine
                 return default(ComponentType);
             }
 
-            public void Set(KMonoBehaviour value, StateMachineInstanceType smi)
+            public void Set(RMonoBehaviour value, StateMachineInstanceType smi)
             {
                 GameObject value2 = null;
                 if ((UnityEngine.Object)value != (UnityEngine.Object)null)

@@ -19,7 +19,7 @@ namespace ZeroPass.StateMachine
         {
             get;
         }
-        
+
         bool isNull
         {
             get;

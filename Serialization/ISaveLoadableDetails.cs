@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace ZeroPass.Serialize
+namespace ZeroPass.Serialization
 {
     public interface ISaveLoadableDetails
     {
