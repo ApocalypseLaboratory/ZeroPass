@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Serialization;
+using UnityEngine;
+using ZeroPass.DataStructure;
 using ZeroPass.Log;
 
 namespace ZeroPass.Serialization
@@ -33,7 +35,7 @@ namespace ZeroPass.Serialization
             for (int i = 0; i < num; i++)
             {
                 DebugLog.Output(DebugLog.Level.Info, "Field " + i.ToString());
-                string text = reader.ReadKleiString();
+                string text = reader.ReadRString();
                 DebugLog.Output(DebugLog.Level.Info, "Field " + i.ToString() + " == " + text);
                 TypeInfo typeInfo = ReadType(reader);
                 if (typeInfo.type == null)
@@ -50,7 +52,7 @@ namespace ZeroPass.Serialization
             for (int j = 0; j < num2; j++)
             {
                 DebugLog.Output(DebugLog.Level.Info, "Property " + j.ToString());
-                string text2 = reader.ReadKleiString();
+                string text2 = reader.ReadRString();
                 DebugLog.Output(DebugLog.Level.Info, "Property " + j.ToString() + " == " + text2);
                 TypeInfo typeInfo2 = ReadType(reader);
                 if (typeInfo2.type == null)
@@ -79,7 +81,7 @@ namespace ZeroPass.Serialization
                     case SerializationTypeInfo.UserDefined:
                     case SerializationTypeInfo.Enumeration:
                         {
-                            string type_name = reader.ReadKleiString();
+                            string type_name = reader.ReadRString();
                             typeInfo.type = Manager.GetType(type_name);
                             break;
                         }
@@ -169,7 +171,7 @@ namespace ZeroPass.Serialization
                         break;
                     case SerializationTypeInfo.UserDefined:
                         {
-                            string type_name2 = reader.ReadKleiString();
+                            string type_name2 = reader.ReadRString();
                             typeInfo.type = Manager.GetType(type_name2);
                             break;
                         }

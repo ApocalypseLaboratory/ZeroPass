@@ -132,7 +132,7 @@ namespace ZeroPass.Serialization
             int num = reader.ReadInt32();
             for (int i = 0; i < num; i++)
             {
-                string text = reader.ReadKleiString();
+                string text = reader.ReadRString();
                 try
                 {
                     DeserializationTemplate value = new DeserializationTemplate(text, reader);

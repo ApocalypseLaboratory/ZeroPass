@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Runtime.Serialization;
 using UnityEngine;
-using YamlDotNet.Core.Tokens;
 using ZeroPass.Serialization;
 using ZeroPass.StateMachine;
 
@@ -161,7 +160,7 @@ namespace ZeroPass
         protected override void OnPrefabInit()
         {
             base.OnPrefabInit();
-            Subscribe(1969584890, OnObjectDestroyedDelegate);
+            Subscribe((int)UtilHashes.ObjectDestroyed, OnObjectDestroyedDelegate);
             InitializeTags();
             if (this.prefabInitFn != null)
             {
@@ -187,7 +186,7 @@ namespace ZeroPass
             if (Tags.Add(tag))
             {
                 dirtyTagBits = true;
-                Trigger(-1582839653, null);
+                Trigger((int)UtilHashes.TagsChanged, null);
             }
             if (serialize)
             {
@@ -200,7 +199,7 @@ namespace ZeroPass
             if (Tags.Remove(tag))
             {
                 dirtyTagBits = true;
-                Trigger(-1582839653, null);
+                Trigger((int)UtilHashes.TagsChanged, null);
             }
             serializedTags.Remove(tag);
         }
@@ -298,7 +297,7 @@ namespace ZeroPass
             {
                 RPrefabIDTracker.Get().Unregister(this);
             }
-            Trigger(1969584890, null);
+            Trigger((int)UtilHashes.ObjectDestroyed, null);
         }
 
         [OnDeserialized]

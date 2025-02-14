@@ -38,7 +38,7 @@ namespace ZeroPass.Serialization
 
         void SkipBytes(int length);
 
-        string ReadKleiString();
+        string ReadRString();
 
         byte[] RawBytes();
     }

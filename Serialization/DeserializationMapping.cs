@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using ZeroPass.Log;
 
 namespace ZeroPass.Serialization
@@ -425,7 +422,7 @@ namespace ZeroPass.Serialization
                     obj = reader.ReadDouble();
                     break;
                 case SerializationTypeInfo.String:
-                    obj = reader.ReadKleiString();
+                    obj = reader.ReadRString();
                     break;
                 case SerializationTypeInfo.Vector2I:
                     obj = reader.ReadVector2I();

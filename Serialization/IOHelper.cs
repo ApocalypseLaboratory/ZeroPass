@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using ZeroPass.DataStructure;
-using ZeroPass.Serialization;
-using ZeroPass;
 using UnityEngine;
+using ZeroPass.DataStructure;
 
 namespace ZeroPass.Serialization
 {

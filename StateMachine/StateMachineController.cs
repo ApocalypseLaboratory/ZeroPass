@@ -59,8 +59,8 @@ namespace ZeroPass.StateMachine
         protected override void OnPrefabInit()
         {
             base.OnPrefabInit();
-            Subscribe(1969584890, OnTargetDestroyedDelegate);
-            Subscribe(1502190696, OnTargetDestroyedDelegate);
+            Subscribe((int)UtilHashes.ObjectDestroyed, OnTargetDestroyedDelegate);
+            Subscribe((int)UtilHashes.QueueDestroyObject, OnTargetDestroyedDelegate);
         }
 
         private void OnTargetDestroyed(object data)

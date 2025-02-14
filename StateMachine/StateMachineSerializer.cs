@@ -63,8 +63,8 @@ namespace ZeroPass.StateMachine
             {
                 int num = reader.ReadInt32();
                 int data_pos = reader.ReadInt32();
-                string typeName = reader.ReadKleiString();
-                string current_state = reader.ReadKleiString();
+                string typeName = reader.ReadRString();
+                string current_state = reader.ReadRString();
                 Type type = Type.GetType(typeName);
                 if (type == null)
                 {
@@ -232,9 +232,9 @@ namespace ZeroPass.StateMachine
             {
                 int num2 = entryData.ReadInt32();
                 int position = entryData.Position;
-                string text = entryData.ReadKleiString();
+                string text = entryData.ReadRString();
                 text = text.Replace("Version=4.0.0.0", "Version=2.0.0.0");
-                string b = entryData.ReadKleiString();
+                string b = entryData.ReadRString();
                 StateMachine.Parameter.Context[] array = parameterContexts;
                 foreach (StateMachine.Parameter.Context context in array)
                 {

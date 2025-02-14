@@ -28,7 +28,7 @@ namespace ZeroPass
 
         private float lastSuspendTime;
 
-        private const string PIPE_NAME = "KLEI_ONI_EXIT_CODE_PIPE";
+        private const string PIPE_NAME = "R_EXIT_CODE_PIPE";
 
         private const string RESTART_FILENAME = "Restarter.exe";
 

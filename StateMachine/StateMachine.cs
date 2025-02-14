@@ -4,10 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using UnityEditor.Rendering.Universal.Internal;
 using UnityEngine;
 using ZeroPass.Serialization;
-using YamlDotNet.Core.Tokens;
 
 namespace ZeroPass.StateMachine
 {
@@ -557,7 +555,7 @@ namespace ZeroPass.StateMachine
                         }
                         parameter.name = fieldInfo.Name;
                         parameter.idx = parameters.Length;
-                        parameters = parameters.Append(parameter);
+                        parameters = (Parameter[])parameters.Append(parameter);
                     }
                     else if (fieldInfo.FieldType.IsSubclassOf(typeof(StateMachine)))
                     {
@@ -1483,7 +1481,7 @@ namespace ZeroPass.StateMachine
 
                 public override void Deserialize(IReader reader)
                 {
-                    string text = reader.ReadKleiString();
+                    string text = reader.ReadRString();
                     if (text != string.Empty)
                     {
                         ResourceGuid guid = new ResourceGuid(text, null);
