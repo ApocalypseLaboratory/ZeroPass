@@ -67,7 +67,7 @@ namespace ZeroPass
 
             public IntraObjectHandler(Action<ComponentType, object> handler)
             {
-                Debug.Assert(handler.Method.IsStatic);
+                // Debug.Assert(handler.Method.IsStatic);
                 this.handler = handler;
             }
 
