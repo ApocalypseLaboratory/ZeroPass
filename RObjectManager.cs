@@ -22,7 +22,7 @@ namespace ZeroPass
 
         private void Awake()
         {
-            Debug.Assert(Instance == null);
+            Debug.Assert((Object)Instance == (Object)null);
             Instance = this;
         }
 
