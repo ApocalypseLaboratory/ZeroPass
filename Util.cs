@@ -336,5 +336,15 @@ namespace ZeroPass
 
             return gameObject;
         }
+        
+        public static void RDestroyGameObject(Component original)
+        {
+            RDestroyGameObject(original.gameObject);
+        }
+
+        public static void RDestroyGameObject(GameObject original)
+        {
+            original.DeleteObject();
+        }
     }
 }

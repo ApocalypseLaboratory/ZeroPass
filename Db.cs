@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Database;
 
 namespace ZeroPass
 {
@@ -12,6 +13,8 @@ namespace ZeroPass
         }
 
         private static Db _Instance;
+        
+        public AssignableSlots AssignableSlots;
 
         public static Db Get()
         {

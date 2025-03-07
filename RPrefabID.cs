@@ -2,7 +2,6 @@
 using System.Runtime.Serialization;
 using UnityEngine;
 using ZeroPass.Serialization;
-using ZeroPass.StateMachine;
 
 namespace ZeroPass
 {

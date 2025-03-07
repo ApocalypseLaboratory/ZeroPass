@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using ZeroPass.StateMachine;
 
 namespace ZeroPass
 {
