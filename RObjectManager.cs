@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ZeroPass
 {
@@ -9,29 +11,33 @@ namespace ZeroPass
 
         private List<int> pendingDestroys = new List<int>();
 
+        private static RObjectManager _instance;
+
         public static RObjectManager Instance
         {
-            get;
-            private set;
+            get
+            {
+                if (_instance == null)
+                {
+                    var gameObject = new GameObject(nameof(RObjectManager));
+                    DontDestroyOnLoad(gameObject);
+                    _instance = gameObject.AddComponent<RObjectManager>();
+                }
+
+                return _instance;
+            }
         }
 
         public static void DestroyInstance()
         {
-            Instance = null;
+            _instance = null;
         }
-
-        private void Awake()
-        {
-            Debug.Assert((Object)Instance == (Object)null);
-            Instance = this;
-        }
+        
 
         private void OnDestroy()
         {
-            Debug.Assert((Object)Instance != (Object)null);
-            Debug.Assert((Object)Instance == (Object)this);
             Cleanup();
-            Instance = null;
+            _instance = null;
         }
 
         public void Cleanup()

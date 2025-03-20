@@ -17,8 +17,6 @@ namespace ZeroPass
 
         private bool isInitialized;
 
-        protected bool simRenderLoadBalance;
-
         public bool isSpawned
         {
             get;
