@@ -364,21 +364,32 @@ namespace ZeroPass.Serialization
                     }
                 case SerializationTypeInfo.UserDefined:
                     {
-                        int num = reader.ReadInt32();
-                        if (num >= 0)
+                        int blockSize = reader.ReadInt32();
+                        if (blockSize >= 0)
                         {
-                            Type type2 = type_info.type;
-                            if (base_value == null)
+                            // Read actual type name from stream
+                            string typeName = reader.ReadRString();
+                            Type actualType = Type.GetType(typeName);
+
+                            if (actualType == null)
+                                throw new InvalidOperationException($"Failed to load type: {typeName}");
+
+                            // Create an instance of the actual type
+                            if (base_value == null || base_value.GetType() != actualType)
                             {
-                                ConstructorInfo constructor = type2.GetConstructor(Type.EmptyTypes);
-                                obj = ((constructor == null) ? FormatterServices.GetUninitializedObject(type2) : Activator.CreateInstance(type2));
+                                ConstructorInfo ctor = actualType.GetConstructor(Type.EmptyTypes);
+                                obj = (ctor == null)
+                                    ? FormatterServices.GetUninitializedObject(actualType)
+                                    : Activator.CreateInstance(actualType);
                             }
                             else
                             {
                                 obj = base_value;
                             }
-                            DeserializationMapping deserializationMapping = Manager.GetDeserializationMapping(type2);
-                            deserializationMapping.Deserialize(obj, reader);
+
+                            // Use deserialization mapping for the actual type
+                            DeserializationMapping mapping = Manager.GetDeserializationMapping(actualType);
+                            mapping.Deserialize(obj, reader);
                         }
                         break;
                     }

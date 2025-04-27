@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Database;
+using Unity.VisualScripting;
 
 namespace ZeroPass
 {
@@ -14,8 +14,12 @@ namespace ZeroPass
 
         private static Db _Instance;
         
-        public AssignableSlots AssignableSlots;
-
+        public Database.AssignableSlots AssignableSlots;
+        public Database.Amounts Amounts;
+        public Database.AmountSets AmountSets;
+        public Database.GameAbilityAssets GameAbilityAssets;
+        public Database.GameEffectAssets GameEffectAssets;
+        
         public static Db Get()
         {
             if ((UnityEngine.Object)_Instance == (UnityEngine.Object)null)
@@ -31,6 +35,7 @@ namespace ZeroPass
         {
             base.Initialize();
             // Load assets
+            AssignableSlots = new Database.AssignableSlots();
             CollectResources(Root, ResourceTable);
         }
 

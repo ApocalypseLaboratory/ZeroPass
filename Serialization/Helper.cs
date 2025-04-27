@@ -242,16 +242,21 @@ namespace ZeroPass.Serialization
                 case SerializationTypeInfo.UserDefined:
                     if (value != null)
                     {
-                        long position7 = writer.BaseStream.Position;
+                        long positionStart = writer.BaseStream.Position;
                         writer.Write(0);
-                        long position8 = writer.BaseStream.Position;
-                        SerializationTemplate serializationTemplate3 = Manager.GetSerializationTemplate(type_info.type);
-                        serializationTemplate3.SerializeData(value, writer);
-                        long position9 = writer.BaseStream.Position;
-                        long num4 = position9 - position8;
-                        writer.BaseStream.Position = position7;
-                        writer.Write((int)num4);
-                        writer.BaseStream.Position = position9;
+                        long positionDataStart = writer.BaseStream.Position;
+
+                        Type actualType = value.GetType();
+                        writer.WriteRString(actualType.AssemblyQualifiedName);
+
+                        SerializationTemplate template = Manager.GetSerializationTemplate(actualType);
+                        template.SerializeData(value, writer);
+
+                        long positionEnd = writer.BaseStream.Position;
+                        int blockSize = (int)(positionEnd - positionDataStart);
+                        writer.BaseStream.Position = positionStart;
+                        writer.Write(blockSize);
+                        writer.BaseStream.Position = positionEnd;
                     }
                     else
                     {
