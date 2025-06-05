@@ -23,7 +23,7 @@ namespace ZeroPass
             private set;
         }
         public new Transform transform => base.transform;
-        public bool isNull => (UnityEngine.Object)this == (UnityEngine.Object)null;
+        public bool isNull => this == null;
 
         public void Awake()
         {
@@ -37,7 +37,7 @@ namespace ZeroPass
         {
             if (!isInitialized)
             {
-                if (!isPoolPreInit && Application.isPlaying && (UnityEngine.Object)lastGameObject != (UnityEngine.Object)base.gameObject)
+                if (!isPoolPreInit && Application.isPlaying && lastGameObject != base.gameObject)
                 {
                     lastGameObject = base.gameObject;
                     lastObj = RObjectManager.Instance.GetOrCreateObject(base.gameObject);
@@ -92,7 +92,7 @@ namespace ZeroPass
                 }
                 else
                 {
-                    if ((UnityEngine.Object)RObjectManager.Instance != (UnityEngine.Object)null)
+                    if (RObjectManager.Instance != null)
                     {
                         RObjectManager.Instance.QueueDestroy(obj);
                     }

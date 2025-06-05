@@ -176,7 +176,7 @@ namespace ZeroPass
             for (int num = subscribedEvents.size - 1; num >= 0; num--)
             {
                 SubscribedEntry subscribedEntry = subscribedEvents[num];
-                if ((UnityEngine.Object)subscribedEntry.go != (UnityEngine.Object)null)
+                if (subscribedEntry.go != null)
                 {
                     Unsubscribe(subscribedEntry.go, subscribedEntry.hash, subscribedEntry.handler);
                 }
@@ -208,7 +208,7 @@ namespace ZeroPass
                     if (subscribedEntry2.handler == handler)
                     {
                         SubscribedEntry subscribedEntry3 = subscribedEvents[num];
-                        if ((UnityEngine.Object)subscribedEntry3.go == (UnityEngine.Object)target)
+                        if (subscribedEntry3.go == target)
                         {
                             break;
                         }
@@ -319,7 +319,7 @@ namespace ZeroPass
         public void Unsubscribe(GameObject target, int eventName, Action<object> handler)
         {
             UnregisterEvent(target, eventName, handler);
-            if (!((UnityEngine.Object)target == (UnityEngine.Object)null))
+            if (!(target == null))
             {
                 RObject orCreateObject = RObjectManager.Instance.GetOrCreateObject(target);
                 orCreateObject.GetEventSystem().Unsubscribe(eventName, handler);

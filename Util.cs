@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -35,22 +36,46 @@ namespace ZeroPass
 
         public static void InitializeComponent(Component cmp)
         {
-            if ((UnityEngine.Object)cmp != (UnityEngine.Object)null)
+            if (cmp != null)
             {
                 RMonoBehaviour RMonoBehaviour = cmp as RMonoBehaviour;
-                if ((UnityEngine.Object)RMonoBehaviour != (UnityEngine.Object)null)
+                if (RMonoBehaviour != null)
                 {
                     RMonoBehaviour.InitializeComponent();
                 }
             }
         }
+        
+        public static string GetRRootPath()
+        {
+            if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                return Path.Combine(folderPath, "R");
+            }
+            return defaultRootFolder;
+        }
+
+        public static string GetTitleFolderName()
+        {
+            return "ZeroPass";
+        }
+        
+        public static string RootFolder()
+        {
+            if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                return Path.Combine(GetRRootPath(), GetTitleFolderName());
+            }
+            return GetRRootPath();
+        }
 
         public static void SpawnComponent(Component cmp)
         {
-            if ((UnityEngine.Object)cmp != (UnityEngine.Object)null)
+            if (cmp != null)
             {
                 RMonoBehaviour RMonoBehaviour = cmp as RMonoBehaviour;
-                if ((UnityEngine.Object)RMonoBehaviour != (UnityEngine.Object)null)
+                if (RMonoBehaviour != null)
                 {
                     RMonoBehaviour.Spawn();
                 }
@@ -89,7 +114,7 @@ namespace ZeroPass
         public static T FindOrAddUnityComponent<T>(this GameObject go) where T : Component
         {
             T val = go.GetComponent<T>();
-            if ((UnityEngine.Object)val == (UnityEngine.Object)null)
+            if (val == null)
             {
                 val = go.AddComponent<T>();
             }
@@ -105,7 +130,7 @@ namespace ZeroPass
         public static Component RequireComponent(this GameObject go, string name)
         {
             Component component = go.GetComponent(name);
-            if ((UnityEngine.Object)component == (UnityEngine.Object)null)
+            if (component == null)
             {
                 Debug.LogErrorFormat(go, "{0} '{1}' requires a component of type {2}!", go.GetType().ToString(),
                     go.name, name);
@@ -119,7 +144,7 @@ namespace ZeroPass
         public static T RequireComponent<T>(this Component cmp) where T : Component
         {
             T component = cmp.gameObject.GetComponent<T>();
-            if ((UnityEngine.Object)component == (UnityEngine.Object)null)
+            if (component == null)
             {
                 Debug.LogErrorFormat(cmp.gameObject, "{0} '{1}' requires a component of type {2} as requested by {3}!",
                     cmp.gameObject.GetType().ToString(), cmp.gameObject.name, typeof(T).ToString(),
@@ -134,7 +159,7 @@ namespace ZeroPass
         public static T RequireComponent<T>(this GameObject gameObject) where T : Component
         {
             T component = gameObject.GetComponent<T>();
-            if ((UnityEngine.Object)component == (UnityEngine.Object)null)
+            if (component == null)
             {
                 Debug.LogErrorFormat(gameObject, "{0} '{1}' requires a component of type {2}!",
                     gameObject.GetType().ToString(), gameObject.name, typeof(T).ToString());
@@ -167,11 +192,11 @@ namespace ZeroPass
         public static T FindOrAddComponent<T>(this GameObject go) where T : Component
         {
             T val = go.GetComponent<T>();
-            if ((UnityEngine.Object)val == (UnityEngine.Object)null)
+            if (val == null)
             {
                 val = go.AddComponent<T>();
                 RMonoBehaviour RMonoBehaviour = val as RMonoBehaviour;
-                if ((UnityEngine.Object)RMonoBehaviour != (UnityEngine.Object)null && !RMonoBehaviour.isPoolPreInit &&
+                if (RMonoBehaviour != null && !RMonoBehaviour.isPoolPreInit &&
                     !RMonoBehaviour.IsInitialized())
                 {
                     Debug.LogErrorFormat("Could not find component " + typeof(T).ToString() + " on object " +
@@ -280,15 +305,15 @@ namespace ZeroPass
             }
 
             GameObject gameObject = null;
-            if ((UnityEngine.Object)original == (UnityEngine.Object)null)
+            if (original == null)
             {
                 DebugUtil.LogWarningArgs("Missing prefab");
             }
 
-            if ((UnityEngine.Object)gameObject == (UnityEngine.Object)null)
+            if (gameObject == null)
             {
-                if ((UnityEngine.Object)original.GetComponent<RectTransform>() != (UnityEngine.Object)null &&
-                    (UnityEngine.Object)parent != (UnityEngine.Object)null)
+                if (original.GetComponent<RectTransform>() != null &&
+                    parent != null)
                 {
                     gameObject = UnityEngine.Object.Instantiate(original, position, rotation);
                     gameObject.transform.SetParent(parent.transform, true);
@@ -296,7 +321,7 @@ namespace ZeroPass
                 else
                 {
                     Transform parent2 = null;
-                    if ((UnityEngine.Object)parent != (UnityEngine.Object)null)
+                    if (parent != null)
                     {
                         parent2 = parent.transform;
                     }
@@ -320,7 +345,7 @@ namespace ZeroPass
             }
 
             RPrefabID component = gameObject.GetComponent<RPrefabID>();
-            if ((UnityEngine.Object)component != (UnityEngine.Object)null)
+            if (component != null)
             {
                 if (initialize_id)
                 {

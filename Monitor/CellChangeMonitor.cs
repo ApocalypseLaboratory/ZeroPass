@@ -171,7 +171,7 @@ namespace ZeroPass.Monitor
 			CellChangedEntry value = default(CellChangedEntry);
 			if (cellChangedHandlers.TryGetValue(dirtyTransform, out value))
 			{
-				if ((UnityEngine.Object)value.transform == (UnityEngine.Object)null)
+				if (value.transform == null)
 				{
 					continue;
 				}

@@ -4,19 +4,21 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 
 namespace ZeroPass
 {
+    [RequireComponent(typeof(AppSM))]
     public class App : MonoBehaviour
     {
-        public static App instance;
+        public static App Instance;
 
         public static bool IsExiting;
 
-        public static System.Action OnPreLoadScene;
+        public static Action OnPreLoadScene;
 
-        public static System.Action OnPostLoadScene;
+        public static Action OnPostLoadScene;
 
         public static bool isLoading;
 
@@ -67,6 +69,23 @@ namespace ZeroPass
             }
         }
 
+        public void InitDll()
+        {
+            AddressableManager.Instance.LoadAssetAsync<TextAsset>("HotUpdate", obj =>
+            {
+                if (obj.Status == AsyncOperationStatus.Succeeded)
+                {
+                    var hotUpdateAss = Assembly.Load(obj.Result.bytes);
+                    var type = hotUpdateAss.GetType("Hello");
+                    type.GetMethod("Run").Invoke(null, null);
+                }
+                else
+                {
+                    Debug.LogError("Load LoadDll Failed");
+                }
+            }).Forget();
+        }
+
         public static string GetCurrentSceneName()
         {
             return currentSceneName;
@@ -77,21 +96,6 @@ namespace ZeroPass
             IsExiting = true;
         }
 
-        public void Restart()
-        {
-            string fileName = Process.GetCurrentProcess().MainModule.FileName;
-            string fullPath = Path.GetFullPath(fileName);
-            string directoryName = Path.GetDirectoryName(fullPath);
-            Debug.LogFormat("Restarting\n\texe ({0})\n\tfull ({1})\n\tdir ({2})", fileName, fullPath, directoryName);
-            string filename = Path.Combine(directoryName, "Restarter.exe");
-            ProcessStartInfo processStartInfo = new ProcessStartInfo(filename);
-            processStartInfo.UseShellExecute = true;
-            processStartInfo.CreateNoWindow = true;
-            processStartInfo.Arguments = $"\"{fullPath}\"";
-            Process.Start(processStartInfo);
-            Quit();
-        }
-
         public static void Quit()
         {
             Application.Quit();
@@ -99,7 +103,14 @@ namespace ZeroPass
 
         private void Awake()
         {
-            instance = this;
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        private void Start()
+        {
+            var appSM = GetComponent<AppSM>();
+            appSM.GetSMI().StartSM();
         }
 
         public static void LoadScene(string scene_name)
@@ -118,26 +129,26 @@ namespace ZeroPass
 
         public void LateUpdate()
         {
-            // if (isLoading)
-            // {
-            //     RObjectManager.Instance.Cleanup();
-            //     RMonoBehaviour.lastGameObject = null;
-            //     RMonoBehaviour.lastObj = null;
-            //     Resources.UnloadUnusedAssets();
-            //     GC.Collect();
-            //     if (OnPreLoadScene != null)
-            //     {
-            //         OnPreLoadScene();
-            //     }
-            //     SceneManager.LoadScene(loadingSceneName);
-            //     if (OnPostLoadScene != null)
-            //     {
-            //         OnPostLoadScene();
-            //     }
-            //     isLoading = false;
-            //     currentSceneName = loadingSceneName;
-            //     loadingSceneName = null;
-            // }
+            if (isLoading)
+            {
+                // RObjectManager.Instance.Cleanup();
+                // RMonoBehaviour.lastGameObject = null;
+                // RMonoBehaviour.lastObj = null;
+                Resources.UnloadUnusedAssets();
+                GC.Collect();
+                if (OnPreLoadScene != null)
+                {
+                    OnPreLoadScene();
+                }
+                SceneManager.LoadScene(loadingSceneName);
+                if (OnPostLoadScene != null)
+                {
+                    OnPostLoadScene();
+                }
+                isLoading = false;
+                currentSceneName = loadingSceneName;
+                loadingSceneName = null;
+            }
         }
 
         private void OnDestroy()

@@ -103,7 +103,7 @@ namespace ZeroPass
             {
                 CmpFns cmpFns = fieldData.cmpFns;
                 FieldInfo fieldInfo = fieldData.fieldInfo;
-                if (!((UnityEngine.Object)(Component)fieldInfo.GetValue(c) != (UnityEngine.Object)null))
+                if (!((Component)fieldInfo.GetValue(c) != null))
                 {
                     if (fieldData.myCmpType == MyCmpType.Add)
                     {
@@ -133,7 +133,7 @@ namespace ZeroPass
             {
                 CmpFns cmpFns = fieldData.cmpFns;
                 FieldInfo fieldInfo = fieldData.fieldInfo;
-                if ((UnityEngine.Object)(Component)fieldInfo.GetValue(c) != (UnityEngine.Object)null)
+                if ((Component)fieldInfo.GetValue(c) != null)
                 {
                     Component cmp = fieldInfo.GetValue(c) as Component;
                     Util.SpawnComponent(cmp);
@@ -146,7 +146,7 @@ namespace ZeroPass
                 else if (fieldData.myCmpType == MyCmpType.Req)
                 {
                     Component component = cmpFns.mRequireFn(c);
-                    if ((UnityEngine.Object)component == (UnityEngine.Object)null)
+                    if (component == null)
                     {
                         Debug.LogError("The behaviour " + type.ToString() + " required but couldn't find a " + fieldInfo.FieldType.Name);
                     }

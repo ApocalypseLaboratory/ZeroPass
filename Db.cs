@@ -20,9 +20,10 @@ namespace ZeroPass
         public Database.GameAbilityAssets GameAbilityAssets;
         public Database.GameEffectAssets GameEffectAssets;
         
+        
         public static Db Get()
         {
-            if ((UnityEngine.Object)_Instance == (UnityEngine.Object)null)
+            if (_Instance == null)
             {
                 // Load Db Assets
                 //_Instance = Resources.Load<Db>("Db");
@@ -36,6 +37,11 @@ namespace ZeroPass
             base.Initialize();
             // Load assets
             AssignableSlots = new Database.AssignableSlots();
+            Amounts = new Database.Amounts(Root);
+            AmountSets = new Database.AmountSets(Root);
+            GameAbilityAssets = new Database.GameAbilityAssets(Root);
+            GameEffectAssets = new Database.GameEffectAssets(Root);
+            
             CollectResources(Root, ResourceTable);
         }
 

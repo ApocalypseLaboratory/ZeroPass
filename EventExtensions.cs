@@ -1,12 +1,47 @@
+using System;
 using UnityEngine;
 
 namespace ZeroPass
 {
     public static class EventExtensions
     {
-        public static int Subscribe<ComponentType>(this GameObject go, int hash, EventSystem.IntraObjectHandler<ComponentType> handler)
+        public static int Subscribe(this GameObject go, int hash, Action<object> handler)
         {
-            return RObjectManager.Instance.GetOrCreateObject(go).GetEventSystem().Subscribe(hash, handler);
+            RMonoBehaviour component = go.GetComponent<RMonoBehaviour>();
+            return component.Subscribe(hash, handler);
+        }
+
+        public static void Subscribe(this GameObject go, GameObject target, int hash, Action<object> handler)
+        {
+            RMonoBehaviour component = go.GetComponent<RMonoBehaviour>();
+            component.Subscribe(target, hash, handler);
+        }
+
+        public static void Unsubscribe(this GameObject go, int hash, Action<object> handler)
+        {
+            RMonoBehaviour component = go.GetComponent<RMonoBehaviour>();
+            if (component != null)
+            {
+                component.Unsubscribe(hash, handler);
+            }
+        }
+
+        public static void Unsubscribe(this GameObject go, int id)
+        {
+            RMonoBehaviour component = go.GetComponent<RMonoBehaviour>();
+            if (component != null)
+            {
+                component.Unsubscribe(id);
+            }
+        }
+
+        public static void Unsubscribe(this GameObject go, GameObject target, int hash, Action<object> handler)
+        {
+            RMonoBehaviour component = go.GetComponent<RMonoBehaviour>();
+            if (component != null)
+            {
+                component.Unsubscribe(target, hash, handler);
+            }
         }
 
         public static void Trigger(this GameObject go, int hash, object data = null)

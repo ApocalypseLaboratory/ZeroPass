@@ -48,7 +48,7 @@ namespace ZeroPass.Log
 
         public static void Log(object obj, UnityEngine.Object context)
         {
-            WriteTimeStamped("[INFO]", (!(context != (UnityEngine.Object)null)) ? "null" : context.name, obj);
+            WriteTimeStamped("[INFO]", (!(context != null)) ? "null" : context.name, obj);
         }
 
         public static void LogFormat(string format, params object[] args)
@@ -58,7 +58,7 @@ namespace ZeroPass.Log
 
         public static void LogFormat(UnityEngine.Object context, string format, params object[] args)
         {
-            WriteTimeStamped("[INFO]", (!(context != (UnityEngine.Object)null)) ? "null" : context.name, string.Format(format, args));
+            WriteTimeStamped("[INFO]", (!(context != null)) ? "null" : context.name, string.Format(format, args));
         }
 
         public static void LogWarning(object obj)
@@ -68,7 +68,7 @@ namespace ZeroPass.Log
 
         public static void LogWarning(object obj, UnityEngine.Object context)
         {
-            WriteTimeStamped("[WARNING]", (!(context != (UnityEngine.Object)null)) ? "null" : context.name, obj);
+            WriteTimeStamped("[WARNING]", (!(context != null)) ? "null" : context.name, obj);
         }
 
         public static void LogWarningFormat(string format, params object[] args)
@@ -78,7 +78,7 @@ namespace ZeroPass.Log
 
         public static void LogWarningFormat(UnityEngine.Object context, string format, params object[] args)
         {
-            WriteTimeStamped("[WARNING]", (!(context != (UnityEngine.Object)null)) ? "null" : context.name, string.Format(format, args));
+            WriteTimeStamped("[WARNING]", (!(context != null)) ? "null" : context.name, string.Format(format, args));
         }
 
         public static void LogError(object obj)
@@ -89,7 +89,7 @@ namespace ZeroPass.Log
 
         public static void LogError(object obj, UnityEngine.Object context)
         {
-            WriteTimeStamped("[ERROR]", (!(context != (UnityEngine.Object)null)) ? "null" : context.name, obj);
+            WriteTimeStamped("[ERROR]", (!(context != null)) ? "null" : context.name, obj);
             UnityEngine.Debug.LogError(obj, context);
         }
 
@@ -101,7 +101,7 @@ namespace ZeroPass.Log
 
         public static void LogErrorFormat(UnityEngine.Object context, string format, params object[] args)
         {
-            WriteTimeStamped("[ERROR]", (!(context != (UnityEngine.Object)null)) ? "null" : context.name, string.Format(format, args));
+            WriteTimeStamped("[ERROR]", (!(context != null)) ? "null" : context.name, string.Format(format, args));
             UnityEngine.Debug.LogErrorFormat(context, format, args);
         }
 

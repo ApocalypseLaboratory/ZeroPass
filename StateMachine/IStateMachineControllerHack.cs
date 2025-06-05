@@ -1,6 +1,9 @@
-﻿public interface IStateMachineControllerHack
+﻿namespace ZeroPass
 {
-    void CreateSMIS();
+    public interface IStateMachineControllerHack
+    {
+        void CreateSMIS();
 
-    void StartSMIS();
+        void StartSMIS();
+    }
 }
