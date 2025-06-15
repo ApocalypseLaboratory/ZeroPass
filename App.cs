@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -109,8 +107,11 @@ namespace ZeroPass
 
         private void Start()
         {
-            var appSM = GetComponent<AppSM>();
-            appSM.GetSMI().StartSM();
+            Singleton<StateMachineUpdater>.CreateInstance();
+            Singleton<StateMachineManager>.CreateInstance();
+            Singleton<AddressableManager>.CreateInstance();
+            var appSM = this.GetComponent<AppSM>();
+            appSM.smi.StartSM();
         }
 
         public static void LoadScene(string scene_name)
@@ -155,6 +156,9 @@ namespace ZeroPass
         {
             if (IsExiting)
             {
+                Singleton<StateMachineUpdater>.DestroyInstance();
+                Singleton<StateMachineManager>.DestroyInstance();
+                Singleton<AddressableManager>.DestroyInstance();
                 RObjectManager.DestroyInstance();
             }
         }

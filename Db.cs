@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
+using UnityEngine;
 
 namespace ZeroPass
 {
@@ -25,8 +25,7 @@ namespace ZeroPass
         {
             if (_Instance == null)
             {
-                // Load Db Assets
-                //_Instance = Resources.Load<Db>("Db");
+                _Instance = CreateInstance<Db>();
                 _Instance.Initialize();
             }
             return _Instance;
@@ -63,18 +62,13 @@ namespace ZeroPass
 
         public ResourceType GetResource<ResourceType>(ResourceGuid guid) where ResourceType : Resource
         {
-            Resource resource = ResourceTable.FirstOrDefault((Resource s) => s.Guid == guid);
+            Resource resource = ResourceTable.FirstOrDefault(s => s.Guid == guid);
             if (resource == null)
             {
                 Debug.LogWarning("Could not find resource: " + guid);
-                return (ResourceType)null;
+                return null;
             }
             ResourceType val = (ResourceType)resource;
-            if (val == null)
-            {
-                Debug.LogError("Resource type mismatch for resource: " + resource.Id + "\nExpecting Type: " + typeof(ResourceType).Name + "\nGot Type: " + resource.GetType().Name);
-                return (ResourceType)null;
-            }
             return val;
         }
     }

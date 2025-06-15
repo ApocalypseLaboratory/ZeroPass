@@ -24,7 +24,7 @@ namespace ZeroPass
             Tag tag = Create(tag_string);
             if (string.IsNullOrEmpty(proper_name))
             {
-                DebugUtil.Assert(false, "Attempting to set proper name for tag: " + tag_string + "to null or empty.");
+                DebugUtil.Assert(false, "Attempting to set proper name for tag: " + tag_string + " to null or empty.");
             }
             ProperNames[tag] = proper_name;
             return tag;
