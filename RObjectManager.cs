@@ -28,6 +28,11 @@ namespace ZeroPass
             }
         }
 
+        public static bool IsInitialized()
+        {
+            return _instance != null;
+        }
+
         public static void DestroyInstance()
         {
             _instance.Cleanup();

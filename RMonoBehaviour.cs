@@ -92,7 +92,7 @@ namespace ZeroPass
                 }
                 else
                 {
-                    if (RObjectManager.Instance != null)
+                    if (RObjectManager.IsInitialized())
                     {
                         RObjectManager.Instance.QueueDestroy(obj);
                     }
