@@ -136,11 +136,9 @@ namespace ZeroPass
                         Entry entry = entries[j];
                         if (entry.hash == hash)
                         {
-                            Entry entry2 = entries[j];
-                            if (entry2.handler != null)
+                            if (entry.handler != null)
                             {
-                                Entry entry3 = entries[j];
-                                entry3.handler(data);
+                                entry.handler(data);
                             }
                         }
                     }
@@ -149,14 +147,12 @@ namespace ZeroPass
                 {
                     for (int k = 0; k < size; k++)
                     {
-                        Entry entry4 = entries[k];
-                        if (entry4.hash == hash)
+                        Entry entry = entries[k];
+                        if (entry.hash == hash)
                         {
-                            Entry entry5 = entries[k];
-                            if (entry5.handler != null)
+                            if (entry.handler != null)
                             {
-                                Entry entry6 = entries[k];
-                                entry6.handler(data);
+                                entry.handler(data);
                             }
                         }
                     }
@@ -166,7 +162,7 @@ namespace ZeroPass
                 {
                     dirty = false;
                     entries.RemoveAllSwap((Entry x) => x.handler == null);
-                    intraObjectRoutes.RemoveAllSwap((IntraObjectRoute route) => !route.IsValid());
+                    intraObjectRoutes.RemoveAllSwap(route => !route.IsValid());
                 }
             }
         }

@@ -110,7 +110,7 @@ namespace ZeroPass
             Singleton<StateMachineUpdater>.CreateInstance();
             Singleton<StateMachineManager>.CreateInstance();
             Singleton<AddressableManager>.CreateInstance();
-            var appSM = this.GetComponent<AppSM>();
+            var appSM = GetComponent<AppSM>();
             appSM.smi.StartSM();
         }
 

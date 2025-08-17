@@ -10,7 +10,7 @@ namespace ZeroPass
         [SerializeField]
         private int defIdx;
 
-        private static List<object> defs = new List<object>();
+        private static List<object> defs = new();
 
         public bool IsValid()
         {
@@ -21,7 +21,7 @@ namespace ZeroPass
         {
             if (defIdx == 0)
             {
-                defs.Add((object)new DefType());
+                defs.Add(new DefType());
                 defIdx = defs.Count;
             }
             return defs[defIdx - 1] as DefType;
@@ -29,7 +29,7 @@ namespace ZeroPass
 
         public void Set<DefType>(DefType value) where DefType : class, new()
         {
-            defs.Add((object)value);
+            defs.Add(value);
             defIdx = defs.Count;
         }
     }

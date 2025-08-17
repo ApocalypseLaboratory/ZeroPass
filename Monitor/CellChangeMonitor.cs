@@ -5,234 +5,218 @@ using UnityEngine;
 namespace ZeroPass.Monitor
 {
     public class CellChangeMonitor : Singleton<CellChangeMonitor>
-{
-	private struct CellChangedEntry
-	{
-		public struct Handler
-		{
-			public string name;
+    {
+        private readonly List<CellChangedEntry.Handler> cellChangedCallbacksToRun = new();
 
-			public System.Action callback;
-		}
+        private readonly Dictionary<int, CellChangedEntry> cellChangedHandlers = new();
 
-		public Transform transform;
+        private HashSet<int> dirtyTransforms = new();
 
-		public List<Handler> handlers;
-	}
+        private int gridWidth;
 
-	private struct MovementStateChangedEntry
-	{
-		public Transform transform;
+        private readonly List<Action<Transform, bool>> moveChangedCallbacksToRun = new();
 
-		public List<Action<Transform, bool>> handlers;
-	}
+        private readonly Dictionary<int, MovementStateChangedEntry> movementStateChangedHandlers = new();
 
-	private Dictionary<int, CellChangedEntry> cellChangedHandlers = new Dictionary<int, CellChangedEntry>();
+        private HashSet<int> movingTransforms = new();
 
-	private Dictionary<int, MovementStateChangedEntry> movementStateChangedHandlers = new Dictionary<int, MovementStateChangedEntry>();
+        private HashSet<int> pendingDirtyTransforms = new();
 
-	private HashSet<int> pendingDirtyTransforms = new HashSet<int>();
+        private HashSet<int> previouslyMovingTransforms = new();
 
-	private HashSet<int> dirtyTransforms = new HashSet<int>();
+        private readonly Dictionary<int, int> transformLastKnownCell = new();
 
-	private HashSet<int> movingTransforms = new HashSet<int>();
+        public void MarkDirty(Transform transform)
+        {
+            if (gridWidth != 0)
+            {
+                pendingDirtyTransforms.Add(transform.GetInstanceID());
+                var childCount = transform.childCount;
+                for (var i = 0; i < childCount; i++) MarkDirty(transform.GetChild(i));
+            }
+        }
 
-	private HashSet<int> previouslyMovingTransforms = new HashSet<int>();
+        public bool IsMoving(Transform transform)
+        {
+            return movingTransforms.Contains(transform.GetInstanceID());
+        }
 
-	private Dictionary<int, int> transformLastKnownCell = new Dictionary<int, int>();
+        public void RegisterMovementStateChanged(Transform transform, Action<Transform, bool> handler)
+        {
+            var instanceID = transform.GetInstanceID();
+            var value = default(MovementStateChangedEntry);
+            if (!movementStateChangedHandlers.TryGetValue(instanceID, out value))
+            {
+                value = default;
+                value.handlers = new List<Action<Transform, bool>>();
+                value.transform = transform;
+            }
 
-	private List<CellChangedEntry.Handler> cellChangedCallbacksToRun = new List<CellChangedEntry.Handler>();
+            value.handlers.Add(handler);
+            movementStateChangedHandlers[instanceID] = value;
+        }
 
-	private List<Action<Transform, bool>> moveChangedCallbacksToRun = new List<Action<Transform, bool>>();
+        public void UnregisterMovementStateChanged(int instance_id, Action<Transform, bool> callback)
+        {
+            var value = default(MovementStateChangedEntry);
+            if (movementStateChangedHandlers.TryGetValue(instance_id, out value))
+            {
+                value.handlers.Remove(callback);
+                if (value.handlers.Count == 0) movementStateChangedHandlers.Remove(instance_id);
+            }
+        }
 
-	private int gridWidth;
+        public void UnregisterMovementStateChanged(Transform transform, Action<Transform, bool> callback)
+        {
+            UnregisterMovementStateChanged(transform.GetInstanceID(), callback);
+        }
 
-	public void MarkDirty(Transform transform)
-	{
-		if (gridWidth != 0)
-		{
-			pendingDirtyTransforms.Add(transform.GetInstanceID());
-			int childCount = transform.childCount;
-			for (int i = 0; i < childCount; i++)
-			{
-				MarkDirty(transform.GetChild(i));
-			}
-		}
-	}
+        public int RegisterCellChangedHandler(Transform transform, Action callback, string debug_name)
+        {
+            var instanceID = transform.GetInstanceID();
+            var value = default(CellChangedEntry);
+            if (!cellChangedHandlers.TryGetValue(instanceID, out value))
+            {
+                value = default;
+                value.transform = transform;
+                value.handlers = new List<CellChangedEntry.Handler>();
+            }
 
-	public bool IsMoving(Transform transform)
-	{
-		return movingTransforms.Contains(transform.GetInstanceID());
-	}
+            var handler = default(CellChangedEntry.Handler);
+            handler.name = debug_name;
+            handler.callback = callback;
+            var item = handler;
+            value.handlers.Add(item);
+            cellChangedHandlers[instanceID] = value;
+            return instanceID;
+        }
 
-	public void RegisterMovementStateChanged(Transform transform, Action<Transform, bool> handler)
-	{
-		int instanceID = transform.GetInstanceID();
-		MovementStateChangedEntry value = default(MovementStateChangedEntry);
-		if (!movementStateChangedHandlers.TryGetValue(instanceID, out value))
-		{
-			value = default(MovementStateChangedEntry);
-			value.handlers = new List<Action<Transform, bool>>();
-			value.transform = transform;
-		}
-		value.handlers.Add(handler);
-		movementStateChangedHandlers[instanceID] = value;
-	}
+        public void UnregisterCellChangedHandler(int instance_id, Action callback)
+        {
+            var value = default(CellChangedEntry);
+            if (cellChangedHandlers.TryGetValue(instance_id, out value))
+            {
+                for (var i = 0; i < value.handlers.Count; i++)
+                {
+                    var handler = value.handlers[i];
+                    if (!(handler.callback != callback))
+                    {
+                        value.handlers.RemoveAt(i);
+                        break;
+                    }
+                }
 
-	public void UnregisterMovementStateChanged(int instance_id, Action<Transform, bool> callback)
-	{
-		MovementStateChangedEntry value = default(MovementStateChangedEntry);
-		if (movementStateChangedHandlers.TryGetValue(instance_id, out value))
-		{
-			value.handlers.Remove(callback);
-			if (value.handlers.Count == 0)
-			{
-				movementStateChangedHandlers.Remove(instance_id);
-			}
-		}
-	}
+                if (value.handlers.Count == 0) cellChangedHandlers.Remove(instance_id);
+            }
+        }
 
-	public void UnregisterMovementStateChanged(Transform transform, Action<Transform, bool> callback)
-	{
-		UnregisterMovementStateChanged(transform.GetInstanceID(), callback);
-	}
+        public void UnregisterCellChangedHandler(Transform transform, Action callback)
+        {
+            UnregisterCellChangedHandler(transform.GetInstanceID(), callback);
+        }
 
-	public int RegisterCellChangedHandler(Transform transform, System.Action callback, string debug_name)
-	{
-		int instanceID = transform.GetInstanceID();
-		CellChangedEntry value = default(CellChangedEntry);
-		if (!cellChangedHandlers.TryGetValue(instanceID, out value))
-		{
-			value = default(CellChangedEntry);
-			value.transform = transform;
-			value.handlers = new List<CellChangedEntry.Handler>();
-		}
-		CellChangedEntry.Handler handler = default(CellChangedEntry.Handler);
-		handler.name = debug_name;
-		handler.callback = callback;
-		CellChangedEntry.Handler item = handler;
-		value.handlers.Add(item);
-		cellChangedHandlers[instanceID] = value;
-		return instanceID;
-	}
+        public int PosToCell(Vector3 pos)
+        {
+            var x = pos.x;
+            var num = pos.y + 0.05f;
+            var num2 = (int)num;
+            var num3 = (int)x;
+            return num2 * gridWidth + num3;
+        }
 
-	public void UnregisterCellChangedHandler(int instance_id, System.Action callback)
-	{
-		CellChangedEntry value = default(CellChangedEntry);
-		if (cellChangedHandlers.TryGetValue(instance_id, out value))
-		{
-			for (int i = 0; i < value.handlers.Count; i++)
-			{
-				CellChangedEntry.Handler handler = value.handlers[i];
-				if (!(handler.callback != callback))
-				{
-					value.handlers.RemoveAt(i);
-					break;
-				}
-			}
-			if (value.handlers.Count == 0)
-			{
-				cellChangedHandlers.Remove(instance_id);
-			}
-		}
-	}
+        public void SetGridSize(int grid_width, int grid_height)
+        {
+            gridWidth = grid_width;
+        }
 
-	public void UnregisterCellChangedHandler(Transform transform, System.Action callback)
-	{
-		UnregisterCellChangedHandler(transform.GetInstanceID(), callback);
-	}
+        public void RenderEveryTick()
+        {
+            var hashSet = pendingDirtyTransforms;
+            pendingDirtyTransforms = dirtyTransforms;
+            dirtyTransforms = hashSet;
+            pendingDirtyTransforms.Clear();
+            previouslyMovingTransforms.Clear();
+            hashSet = previouslyMovingTransforms;
+            previouslyMovingTransforms = movingTransforms;
+            movingTransforms = hashSet;
+            foreach (var dirtyTransform in dirtyTransforms)
+            {
+                var value = default(CellChangedEntry);
+                if (cellChangedHandlers.TryGetValue(dirtyTransform, out value))
+                {
+                    if (value.transform == null) continue;
+                    var value2 = -1;
+                    transformLastKnownCell.TryGetValue(dirtyTransform, out value2);
+                    var num = PosToCell(value.transform.GetPosition());
+                    if (value2 != num)
+                    {
+                        cellChangedCallbacksToRun.Clear();
+                        cellChangedCallbacksToRun.AddRange(value.handlers);
+                        foreach (var item in cellChangedCallbacksToRun)
+                        {
+                            var current2 = item;
+                            foreach (var handler in value.handlers)
+                            {
+                                var current3 = handler;
+                                if (current3.callback == current2.callback)
+                                {
+                                    current3.callback();
+                                    break;
+                                }
+                            }
+                        }
 
-	public int PosToCell(Vector3 pos)
-	{
-		float x = pos.x;
-		float num = pos.y + 0.05f;
-		int num2 = (int)num;
-		int num3 = (int)x;
-		return num2 * gridWidth + num3;
-	}
+                        transformLastKnownCell[dirtyTransform] = num;
+                    }
+                }
 
-	public void SetGridSize(int grid_width, int grid_height)
-	{
-		gridWidth = grid_width;
-	}
+                movingTransforms.Add(dirtyTransform);
+                if (!previouslyMovingTransforms.Contains(dirtyTransform))
+                    RunMovementStateChangedCallbacks(dirtyTransform, true);
+            }
 
-	public void RenderEveryTick()
-	{
-		HashSet<int> hashSet = pendingDirtyTransforms;
-		pendingDirtyTransforms = dirtyTransforms;
-		dirtyTransforms = hashSet;
-		pendingDirtyTransforms.Clear();
-		previouslyMovingTransforms.Clear();
-		hashSet = previouslyMovingTransforms;
-		previouslyMovingTransforms = movingTransforms;
-		movingTransforms = hashSet;
-		foreach (int dirtyTransform in dirtyTransforms)
-		{
-			CellChangedEntry value = default(CellChangedEntry);
-			if (cellChangedHandlers.TryGetValue(dirtyTransform, out value))
-			{
-				if (value.transform == null)
-				{
-					continue;
-				}
-				int value2 = -1;
-				transformLastKnownCell.TryGetValue(dirtyTransform, out value2);
-				int num = PosToCell(value.transform.GetPosition());
-				if (value2 != num)
-				{
-					cellChangedCallbacksToRun.Clear();
-					cellChangedCallbacksToRun.AddRange(value.handlers);
-					foreach (CellChangedEntry.Handler item in cellChangedCallbacksToRun)
-					{
-						CellChangedEntry.Handler current2 = item;
-						foreach (CellChangedEntry.Handler handler in value.handlers)
-						{
-							CellChangedEntry.Handler current3 = handler;
-							if (current3.callback == current2.callback)
-							{
-								current3.callback();
-								break;
-							}
-						}
-					}
-					transformLastKnownCell[dirtyTransform] = num;
-				}
-			}
-			movingTransforms.Add(dirtyTransform);
-			if (!previouslyMovingTransforms.Contains(dirtyTransform))
-			{
-				RunMovementStateChangedCallbacks(dirtyTransform, true);
-			}
-		}
-		foreach (int previouslyMovingTransform in previouslyMovingTransforms)
-		{
-			if (!movingTransforms.Contains(previouslyMovingTransform))
-			{
-				RunMovementStateChangedCallbacks(previouslyMovingTransform, false);
-			}
-		}
-		dirtyTransforms.Clear();
-	}
+            foreach (var previouslyMovingTransform in previouslyMovingTransforms)
+                if (!movingTransforms.Contains(previouslyMovingTransform))
+                    RunMovementStateChangedCallbacks(previouslyMovingTransform, false);
+            dirtyTransforms.Clear();
+        }
 
-	private void RunMovementStateChangedCallbacks(int instance_id, bool state)
-	{
-		MovementStateChangedEntry value = default(MovementStateChangedEntry);
-		if (movementStateChangedHandlers.TryGetValue(instance_id, out value))
-		{
-			moveChangedCallbacksToRun.Clear();
-			moveChangedCallbacksToRun.AddRange(value.handlers);
-			foreach (Action<Transform, bool> item in moveChangedCallbacksToRun)
-			{
-				if (value.handlers.Contains(item))
-				{
-					item(value.transform, state);
-				}
-			}
-		}
-	}
+        private void RunMovementStateChangedCallbacks(int instance_id, bool state)
+        {
+            var value = default(MovementStateChangedEntry);
+            if (movementStateChangedHandlers.TryGetValue(instance_id, out value))
+            {
+                moveChangedCallbacksToRun.Clear();
+                moveChangedCallbacksToRun.AddRange(value.handlers);
+                foreach (var item in moveChangedCallbacksToRun)
+                    if (value.handlers.Contains(item))
+                        item(value.transform, state);
+            }
+        }
 
-	private void Validate()
-	{
-	}
-}
+        private void Validate()
+        {
+        }
+
+        private struct CellChangedEntry
+        {
+            public struct Handler
+            {
+                public string name;
+
+                public Action callback;
+            }
+
+            public Transform transform;
+
+            public List<Handler> handlers;
+        }
+
+        private struct MovementStateChangedEntry
+        {
+            public Transform transform;
+
+            public List<Action<Transform, bool>> handlers;
+        }
+    }
 }

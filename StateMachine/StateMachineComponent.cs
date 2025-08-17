@@ -34,6 +34,16 @@ namespace ZeroPass
             }
         }
 
+        public virtual void StopAndCleanup(string reason)
+        {
+            if (_smi != null)
+            {
+                _smi.StopSM(reason);
+                //TODO: maybe pool
+                _smi = null;
+            }
+        }
+
         public override StateMachine.Instance GetSMI()
         {
             return _smi;
@@ -49,10 +59,15 @@ namespace ZeroPass
             }
         }
 
+        protected virtual bool IsAutoStartWhenEnable()
+        {
+            return true;
+        }
+
         protected override void OnCmpEnable()
         {
             base.OnCmpEnable();
-            if (base.isSpawned)
+            if (base.isSpawned && IsAutoStartWhenEnable())
             {
                 StateMachineInstanceType smi = this.smi;
                 smi.StartSM();

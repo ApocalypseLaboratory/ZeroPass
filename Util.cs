@@ -359,6 +359,13 @@ namespace ZeroPass
                 component.RunInstantiateFn();
             }
 
+            Equippable equippable = gameObject.GetComponent<Equippable>();
+            if (equippable != null)
+            {
+                Equippable equippable2 = original.GetComponent<Equippable>();
+                equippable.EquippablePrefabInit = equippable2.EquippablePrefabInit;
+            }
+
             return gameObject;
         }
         

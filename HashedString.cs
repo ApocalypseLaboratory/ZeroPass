@@ -74,10 +74,9 @@ namespace ZeroPass
             return x.hash != y.hash;
         }
 
-
         public override string ToString()
         {
-            return ((ValueType)this).ToString();
+            return hash.ToString();
         }
 
         public void OnAfterDeserialize()
