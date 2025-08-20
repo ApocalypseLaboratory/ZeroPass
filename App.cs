@@ -36,7 +36,7 @@ namespace ZeroPass
 
         private static float[] sleepIntervals;
 
-        static App()
+        static void InitApp()
         {
             IsExiting = false;
             isLoading = false;
@@ -101,6 +101,7 @@ namespace ZeroPass
 
         private void Awake()
         {
+            InitApp();
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
