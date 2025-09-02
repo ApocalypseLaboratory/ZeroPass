@@ -29,6 +29,7 @@ namespace ZeroPass
         private static void WriteTimeStamped(params object[] objs)
         {
             string value = TimeStamp() + DebugUtil.BuildString(objs);
+            UnityEngine.Debug.Log(value);
             Console.WriteLine(value);
         }
 

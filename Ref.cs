@@ -50,23 +50,23 @@ namespace ZeroPass
 
         public ComponentType Get<ComponentType>() where ComponentType : MonoBehaviour
         {
-            ReferenceType x = this.Get();
-            if ((Object)x == (Object)null)
+            ReferenceType x = Get();
+            if (x == null)
             {
-                return (ComponentType)null;
+                return null;
             }
-            return ((Component)x).GetComponent<ComponentType>();
+            return x.GetComponent<ComponentType>();
         }
 
         public ReferenceType Get()
         {
-            if ((Object)obj == (Object)null && id != -1)
+            if (obj == null && id != -1)
             {
                 RPrefabID instance = RPrefabIDTracker.Get().GetInstance(id);
-                if ((Object)instance != (Object)null)
+                if (instance != null)
                 {
-                    obj = ((Component)instance).GetComponent<ReferenceType>();
-                    if ((Object)obj == (Object)null)
+                    obj = instance.GetComponent<ReferenceType>();
+                    if (obj == null)
                     {
                         id = -1;
                         Debug.LogWarning("Missing " + typeof(ReferenceType).Name + " reference: " + id);

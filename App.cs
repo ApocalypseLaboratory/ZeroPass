@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Cysharp.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
@@ -35,6 +37,8 @@ namespace ZeroPass
         private static List<Type> types;
 
         private static float[] sleepIntervals;
+
+        public TMP_Text tmpText;
 
         static void InitApp()
         {
@@ -73,13 +77,14 @@ namespace ZeroPass
             {
                 if (obj.Status == AsyncOperationStatus.Succeeded)
                 {
-                    var hotUpdateAss = Assembly.Load(obj.Result.bytes);
-                    var type = hotUpdateAss.GetType("Hello");
-                    type.GetMethod("Run").Invoke(null, null);
+                    // var hotUpdateAss = Assembly.Load(obj.Result.bytes);
+                    // var type = hotUpdateAss.GetType("Hello");
+                    // TuanJie 1.6.3 do not support HybirdCLR 
+                    // type.GetMethod("Run").Invoke(null, null);
                 }
                 else
                 {
-                    Debug.LogError("Load LoadDll Failed");
+                    Debug.LogError("Load HotUpdate Failed");
                 }
             }).Forget();
         }
@@ -111,8 +116,38 @@ namespace ZeroPass
             Singleton<StateMachineUpdater>.CreateInstance();
             Singleton<StateMachineManager>.CreateInstance();
             Singleton<AddressableManager>.CreateInstance();
+            
+#if UNITY_MINIGAME && !UNITY_EDITOR
+            LoadFont();
             var appSM = GetComponent<AppSM>();
             appSM.smi.StartSM();
+#else
+            Debug.Log("App start");
+            var appSM = GetComponent<AppSM>();
+            appSM.smi.StartSM();
+#endif
+        }
+
+        private void LoadFont()
+        {
+            // The ttf file needs to be placed in the StreamingAssets folder
+            var fallbackFont = Application.streamingAssetsPath + "/LXGWFasmartGothic.ttf";
+            Debug.Log($"fallbackFont : {fallbackFont}");
+            
+            WeChatWASM.WX.InitSDK(
+                (ret) =>
+                {
+                    // fallbackFont serves as an alternative CDN URL for older versions of wechat or when system font files cannot be obtained
+                    // "Note" needs to be replaced with the real font URL of the game!!
+                    WeChatWASM.WX.GetWXFont(
+                        fallbackFont,
+                        (font) =>
+                        {
+                            tmpText.font = TMP_FontAsset.CreateFontAsset(font);
+                        }
+                    );
+                }
+            );
         }
 
         public static void LoadScene(string scene_name)
