@@ -8,7 +8,7 @@ namespace ZeroPass
     {
         public class BucketGroup
         {
-            private List<List<BaseUpdateBucket>> bucketFrames = new List<List<BaseUpdateBucket>>();
+            private List<List<BaseUpdateBucket>> bucketFrames = new();
 
             private string name;
 
