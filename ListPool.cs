@@ -10,11 +10,11 @@ namespace ZeroPass
         {
             public void Recycle()
             {
-                ListPool<ObjectType, PoolIdentifier>.Free(this);
+                Free(this);
             }
         }
 
-        private static ContainerPool<PooledList, PoolIdentifier> pool = new ContainerPool<PooledList, PoolIdentifier>();
+        private static ContainerPool<PooledList, PoolIdentifier> pool = new();
 
         public static PooledList Allocate(List<ObjectType> objects)
         {

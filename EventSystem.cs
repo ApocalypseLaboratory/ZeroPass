@@ -79,7 +79,7 @@ namespace ZeroPass
             public override void Trigger(GameObject gameObject, object eventData)
             {
                 ListPool<ComponentType, IntraObjectHandler<ComponentType>>.PooledList pooledList = ListPool<ComponentType, IntraObjectHandler<ComponentType>>.Allocate();
-                gameObject.GetComponents<ComponentType>((List<ComponentType>)pooledList);
+                gameObject.GetComponents(pooledList);
                 foreach (ComponentType item in pooledList)
                 {
                     handler(item, eventData);

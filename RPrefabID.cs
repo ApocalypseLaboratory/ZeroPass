@@ -186,6 +186,7 @@ namespace ZeroPass
             {
                 dirtyTagBits = true;
                 Trigger((int)UtilHashes.TagsChanged, null);
+                Game.Instance?.Trigger((int)UtilHashes.TagsChanged, (this, tag));
             }
             if (serialize)
             {
@@ -198,9 +199,11 @@ namespace ZeroPass
             if (Tags.Remove(tag))
             {
                 dirtyTagBits = true;
+                serializedTags.Remove(tag);
+                
                 Trigger((int)UtilHashes.TagsChanged, null);
+                Game.Instance?.Trigger((int)UtilHashes.TagsChanged, (this, tag));
             }
-            serializedTags.Remove(tag);
         }
 
         public void SetTag(Tag tag, bool set)
