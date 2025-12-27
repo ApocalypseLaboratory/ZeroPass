@@ -230,5 +230,72 @@ namespace ZeroPass
                 obj.GetEventSystem().Trigger(base.gameObject, hash, data);
             }
         }
+
+        #region event with result
+
+        public int Register<ComponentType, TResult>(int eventName,
+            EventSystem.WRIntraObjectHandler<ComponentType, TResult> handler)
+        {
+            return obj.GetEventSystem().Register(eventName, handler);
+        }
+        
+        public int Register<TResult>(int eventName, EventSystem.GenericEventWithResultHandler<TResult> handler)
+        {
+            return obj.GetEventSystem().Register(eventName, handler);
+        }
+
+        public int Register<TResult>(GameObject target, int eventName, EventSystem.GenericEventWithResultHandler<TResult> handler)
+        {
+            return obj.GetEventSystem().Register(target, eventName, handler);
+        }
+
+        public void Unregister(int eventName, int subscribeHandle, bool suppressWarnings = false)
+        {
+            if (obj != null)
+            {
+                obj.GetEventSystem().Unregister(eventName, subscribeHandle, suppressWarnings);
+            }
+        }
+
+        public void Unregister<TResult>(int hash, EventSystem.GenericEventWithResultHandler<TResult> handler)
+        {
+            if (obj != null)
+            {
+                obj.GetEventSystem().Unregister(hash, handler);
+            }
+        }
+
+        public void Unregister<TResult>(GameObject target, int eventName, EventSystem.GenericEventWithResultHandler<TResult> handler)
+        {
+            if (obj != null)
+            {
+                obj.GetEventSystem().Unregister(target, eventName, handler);
+            }
+        }
+        
+        public void Unregister<ComponentType, TResult>(int hash, EventSystem.WRIntraObjectHandler<ComponentType, TResult> handler, bool suppressWarnings = false)
+        {
+            if (obj != null)
+            {
+                obj.GetEventSystem().Unregister(hash, handler, suppressWarnings);
+            }
+        }
+
+        public void EventWithResult<ComponentType, TResult>(int hash, ref TResult result, params object[] args)
+        {
+            if (obj != null && obj.hasEventSystem)
+            {
+                obj.GetEventSystem().EventWithResult<ComponentType, TResult>(base.gameObject, hash, ref result, args);
+            }
+        }
+
+        public void EventWithResult<TResult>(int hash, ref TResult result, params object[] args)
+        {
+            if (obj != null && obj.hasEventSystem)
+            {
+                obj.GetEventSystem().EventWithResult(hash, ref result, args);
+            }
+        }
+        #endregion
     }
 }

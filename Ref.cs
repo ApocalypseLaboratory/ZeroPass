@@ -28,7 +28,7 @@ namespace ZeroPass
             ReferenceType exists = Get();
             if ((bool)(Object)exists)
             {
-                id = ((Component)obj).GetComponent<RPrefabID>().InstanceID;
+                id = obj.GetComponent<RPrefabID>().InstanceID;
             }
             else
             {
@@ -83,13 +83,13 @@ namespace ZeroPass
 
         public void Set(ReferenceType obj)
         {
-            if ((Object)obj == (Object)null)
+            if (obj == null)
             {
                 id = -1;
             }
             else
             {
-                id = ((Component)obj).GetComponent<RPrefabID>().InstanceID;
+                id = obj.GetComponent<RPrefabID>().InstanceID;
             }
             this.obj = obj;
         }

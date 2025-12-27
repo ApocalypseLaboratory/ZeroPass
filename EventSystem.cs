@@ -93,8 +93,6 @@ namespace ZeroPass
             }
         }
 
-        private static bool ENABLE_DETAILED_EVENT_PROFILE_INFO = false;
-
         private int nextId;
 
         private int currentlyTriggering;
@@ -107,11 +105,7 @@ namespace ZeroPass
 
         private ArrayRef<IntraObjectRoute> intraObjectRoutes;
 
-        private static Dictionary<int, List<IntraObjectHandlerBase>> intraObjectDispatcher = new Dictionary<int, List<IntraObjectHandlerBase>>();
-
-        public EventSystem()
-        {
-        }
+        private static Dictionary<int, List<IntraObjectHandlerBase>> intraObjectDispatcher = new();
 
         public void Trigger(GameObject go, int hash, object data = null)
         {
@@ -128,32 +122,14 @@ namespace ZeroPass
                         list[intraObjectRoute2.handlerIndex].Trigger(go, data);
                     }
                 }
-                int size = entries.size;
-                if (ENABLE_DETAILED_EVENT_PROFILE_INFO)
+                for (int k = 0; k < entries.size; k++)
                 {
-                    for (int j = 0; j < size; j++)
+                    Entry entry = entries[k];
+                    if (entry.hash == hash)
                     {
-                        Entry entry = entries[j];
-                        if (entry.hash == hash)
+                        if (entry.handler != null)
                         {
-                            if (entry.handler != null)
-                            {
-                                entry.handler(data);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for (int k = 0; k < size; k++)
-                    {
-                        Entry entry = entries[k];
-                        if (entry.hash == hash)
-                        {
-                            if (entry.handler != null)
-                            {
-                                entry.handler(data);
-                            }
+                            entry.handler(data);
                         }
                     }
                 }
@@ -186,6 +162,26 @@ namespace ZeroPass
             entries.Clear();
             subscribedEvents.Clear();
             intraObjectRoutes.Clear();
+            
+            
+            for (int num = wrSubscribedEnties.size - 1; num >= 0; num--)
+            {
+                IWRSubscribedEntry wrSubscribedEntryInter = wrSubscribedEnties[num];
+                if (wrSubscribedEntryInter.GO != null)
+                {
+                    Unregister(wrSubscribedEntryInter.GO, wrSubscribedEntryInter.Hash, wrSubscribedEntryInter.ReferenceId);
+                }
+            }
+            for (int i = 0; i < entries.size; i++)
+            {
+                Entry value = entries[i];
+                value.handler = null;
+                entries[i] = value;
+            }
+            
+            wrEntries.Clear();
+            wrSubscribedEnties.Clear();
+            wrIntraObjectRoutes.Clear();
         }
 
         public void UnregisterEvent(GameObject target, int eventName, Action<object> handler)
@@ -198,17 +194,9 @@ namespace ZeroPass
                     return;
                 }
                 SubscribedEntry subscribedEntry = subscribedEvents[num];
-                if (subscribedEntry.hash == eventName)
+                if (subscribedEntry.hash == eventName && subscribedEntry.handler == handler && subscribedEntry.go == target)
                 {
-                    SubscribedEntry subscribedEntry2 = subscribedEvents[num];
-                    if (subscribedEntry2.handler == handler)
-                    {
-                        SubscribedEntry subscribedEntry3 = subscribedEvents[num];
-                        if (subscribedEntry3.go == target)
-                        {
-                            break;
-                        }
-                    }
+                    break;
                 }
                 num++;
             }
@@ -236,13 +224,9 @@ namespace ZeroPass
                     return;
                 }
                 Entry entry = entries[num];
-                if (entry.hash == hash)
+                if (entry.hash == hash && entry.handler == handler)
                 {
-                    Entry entry2 = entries[num];
-                    if (entry2.handler == handler)
-                    {
-                        break;
-                    }
+                    break;
                 }
                 num++;
             }
@@ -315,7 +299,7 @@ namespace ZeroPass
         public void Unsubscribe(GameObject target, int eventName, Action<object> handler)
         {
             UnregisterEvent(target, eventName, handler);
-            if (!(target == null))
+            if (target!= null)
             {
                 RObject orCreateObject = RObjectManager.Instance.GetOrCreateObject(target);
                 orCreateObject.GetEventSystem().Unsubscribe(eventName, handler);
@@ -339,7 +323,7 @@ namespace ZeroPass
             else
             {
                 dirty = true;
-                intraObjectRoutes[num] = default(IntraObjectRoute);
+                intraObjectRoutes[num] = default;
             }
         }
 
@@ -349,17 +333,17 @@ namespace ZeroPass
             {
                 if (!suppressWarnings)
                 {
-                    Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNo subscriptions have been made to event");
+                    Debug.LogWarning("Failed to Unsubscribe event handler: " + handler + "\nNo subscriptions have been made to event");
                 }
             }
             else
             {
-                int num = value.IndexOf((IntraObjectHandlerBase)handler);
+                int num = value.IndexOf(handler);
                 if (num == -1)
                 {
                     if (!suppressWarnings)
                     {
-                        Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNot subscribed to event");
+                        Debug.LogWarning("Failed to Unsubscribe event handler: " + handler + "\nNot subscribed to event");
                     }
                 }
                 else
@@ -369,13 +353,373 @@ namespace ZeroPass
             }
         }
 
-        public void Unsubscribe(string[] eventNames, Action<object> handler)
+        #region event with result
+
+        private int nextWRId; 
+        public delegate void GenericEventWithResultHandler<TResult>(ref TResult result, params object[] args);
+        
+        private interface IWREntry
         {
-            foreach (string s in eventNames)
+            public int Hash { get;}
+            public int ID { get;}
+
+            public void Unregiser();
+
+            public bool IsValid();
+        }
+
+        private struct WREntry<TResult> : IWREntry
+        {
+            public GenericEventWithResultHandler<TResult> handler;
+
+            public WREntry(int hash, GenericEventWithResultHandler<TResult> handler, int id)
             {
-                int hash = Hash.SDBMLower(s);
-                Unsubscribe(hash, handler);
+                this.handler = handler;
+                Hash = hash;
+                ID = id;
+            }
+
+            public int Hash { get; private set; }
+            public int ID { get; set; }
+            public void Unregiser()
+            {
+                handler = null;
+            }
+
+            public bool IsValid()
+            {
+                return handler == null;
             }
         }
+        
+        private interface IWRSubscribedEntry
+        {
+            public int Hash { get;}
+            public GameObject GO { get;}
+            
+            public int ReferenceId { get; }
+        }
+
+        private struct WRSubscribedEntry<TResult> : IWRSubscribedEntry
+        {
+            public GenericEventWithResultHandler<TResult> handler;
+
+            public WRSubscribedEntry(GameObject go, int hash, GenericEventWithResultHandler<TResult> handler, int referenceId)
+            {
+                GO = go;
+                Hash = hash;
+                this.handler = handler;
+                ReferenceId = referenceId;
+            }
+
+            public int Hash { get; private set; }
+            public GameObject GO { get; private set; }
+            
+            public int ReferenceId { get; private set; }
+        }
+
+        private ArrayRef<IWREntry> wrEntries;
+        private ArrayRef<IWRSubscribedEntry> wrSubscribedEnties;
+        
+        public delegate void EventWithResultHandler<ComponentType, TResult>(ComponentType sender, int evt, ref TResult result, params object[] args);
+
+        private static Dictionary<int, List<WRIntraObjectHandlerBase>> wrIntraObjectDispatcher = new();
+        
+        private ArrayRef<WRIntraObjectRoute> wrIntraObjectRoutes;
+
+        public abstract class WRIntraObjectHandlerBase
+        {
+        }
+        
+        public class WRIntraObjectHandler<ComponentType, TResult> : WRIntraObjectHandlerBase
+        {
+            private EventWithResultHandler<ComponentType, TResult> handler;
+            
+            public WRIntraObjectHandler(EventWithResultHandler<ComponentType, TResult> handler)
+            {
+                this.handler = handler;
+            }
+            
+            public static implicit operator WRIntraObjectHandler<ComponentType, TResult>(EventWithResultHandler<ComponentType, TResult> handler)
+            {
+                return new WRIntraObjectHandler<ComponentType, TResult>(handler);
+            }
+            public void EventWithResult(GameObject gameObject, int evt, ref TResult result, params object[] args)
+            {
+                ListPool<ComponentType, IntraObjectHandler<ComponentType>>.PooledList pooledList = ListPool<ComponentType, IntraObjectHandler<ComponentType>>.Allocate();
+                gameObject.GetComponents(pooledList);
+                foreach (ComponentType item in pooledList)
+                {
+                    handler(item, evt, ref result, args);
+                }
+                pooledList.Recycle();
+            }
+        }
+        
+        private struct WRIntraObjectRoute
+        {
+            public int eventHash;
+
+            public int handlerIndex;
+
+            public WRIntraObjectRoute(int eventHash, int handlerIndex)
+            {
+                this.eventHash = eventHash;
+                this.handlerIndex = handlerIndex;
+            }
+
+            public bool IsValid()
+            {
+                return eventHash != 0;
+            }
+        }
+
+        public int Register<ComponentType, TResult>(int eventName, WRIntraObjectHandler<ComponentType, TResult> handler)
+        {
+            if (!wrIntraObjectDispatcher.TryGetValue(eventName, out List<WRIntraObjectHandlerBase> value))
+            {
+                value = new List<WRIntraObjectHandlerBase>();
+                wrIntraObjectDispatcher.Add(eventName, value);
+            }
+            int num = value.IndexOf(handler);
+            if (num == -1)
+            {
+                value.Add(handler);
+                num = value.Count - 1;
+            }
+            wrIntraObjectRoutes.Add(new WRIntraObjectRoute(eventName, num));
+            return num;
+        }
+        
+        public void Unregister(int eventName, int subscribeHandle, bool suppressWarnings = false)
+        {
+            int num = wrIntraObjectRoutes.FindIndex(route => route.eventHash == eventName && route.handlerIndex == subscribeHandle);
+            if (num == -1)
+            {
+                if (!suppressWarnings)
+                {
+                    Debug.LogWarning("Failed to Unsubscribe event handler: " + wrIntraObjectDispatcher[eventName][subscribeHandle].ToString() + "\nNot subscribed to event");
+                }
+            }
+            else if (currentlyTriggering == 0)
+            {
+                wrIntraObjectRoutes.RemoveAtSwap(num);
+            }
+            else
+            {
+                dirty = true;
+                wrIntraObjectRoutes[num] = default;
+            }
+        }
+
+        public void Unregister<ComponentType, TResult>(int eventName, WRIntraObjectHandler<ComponentType, TResult> handler, bool suppressWarnings)
+        {
+            if (!wrIntraObjectDispatcher.TryGetValue(eventName, out List<WRIntraObjectHandlerBase> value))
+            {
+                if (!suppressWarnings)
+                {
+                    Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNo subscriptions have been made to event");
+                }
+            }
+            else
+            {
+                int num = value.IndexOf(handler);
+                if (num == -1)
+                {
+                    if (!suppressWarnings)
+                    {
+                        Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNot subscribed to event");
+                    }
+                }
+                else
+                {
+                    Unregister(eventName, num, suppressWarnings);
+                }
+            }
+        }
+
+        public void EventWithResult<ComponentType, TResult>(GameObject gameObject, int hash, ref TResult result,
+            params object[] args)
+        {
+            if (!App.IsExiting)
+            {
+                currentlyTriggering++;
+                for (int i = 0; i != wrIntraObjectRoutes.size; i++)
+                {
+                    WRIntraObjectRoute wrIntraObjectRoute = wrIntraObjectRoutes[i];
+                    if (wrIntraObjectRoute.eventHash == hash)
+                    {
+                        List<WRIntraObjectHandlerBase> list =wrIntraObjectDispatcher[hash];
+                        WRIntraObjectRoute wrIntraObjectRoute2 = wrIntraObjectRoutes[i];
+                        if (list[wrIntraObjectRoute2.handlerIndex] is WRIntraObjectHandler<ComponentType, TResult>
+                            handler)
+                        {
+                            handler.EventWithResult(gameObject, hash, ref result, args);
+                        }
+                    }
+                }
+                currentlyTriggering--;
+                if (dirty && currentlyTriggering == 0)
+                {
+                    dirty = false;
+                    wrEntries.RemoveAllSwap(x => x.IsValid());
+                    wrIntraObjectRoutes.RemoveAllSwap(route => !route.IsValid());
+                }
+            }
+        }
+        
+        public void EventWithResult<TResult>(int hash, ref TResult result, params object[] args)
+        {
+            if (!App.IsExiting)
+            {
+                currentlyTriggering++;
+                for (int j = 0; j < wrEntries.size; j++)
+                {
+                    IWREntry wrEntryInter = wrEntries[j];
+                    if (wrEntryInter.Hash == hash)
+                    {
+                        if (wrEntryInter is WREntry<TResult> wrEntry)
+                            wrEntry.handler?.Invoke(ref result, args);
+                    }
+                }
+                currentlyTriggering--;
+                if (dirty && currentlyTriggering == 0)
+                {
+                    dirty = false;
+                    wrEntries.RemoveAllSwap(x => x.IsValid());
+                    wrIntraObjectRoutes.RemoveAllSwap(route => !route.IsValid());
+                }
+            }
+        }
+        
+        public int Register<TResult>(int hash, GenericEventWithResultHandler<TResult> handler)
+        {
+            wrEntries.Add(new WREntry<TResult>(hash, handler, ++nextWRId));
+            return nextWRId;
+        }
+        
+        public int Register<TResult>(GameObject target, int eventName, GenericEventWithResultHandler<TResult> handler)
+        {
+            RObject orCreateObject = RObjectManager.Instance.GetOrCreateObject(target);
+            var referenceId = orCreateObject.GetEventSystem().Register(eventName, handler);
+            wrSubscribedEnties.Add(new WRSubscribedEntry<TResult>(target, eventName, handler, referenceId));
+            return referenceId;
+        }
+        
+        public void Unregister(GameObject target, int eventName, int referenceId)
+        {
+            int num = 0;
+            while (true)
+            {
+                if (num >= wrSubscribedEnties.size)
+                {
+                    return;
+                }
+                var subscribedEntryInter = wrSubscribedEnties[num];
+                if (subscribedEntryInter.Hash == eventName && subscribedEntryInter.GO == target && subscribedEntryInter.ReferenceId == referenceId)
+                {
+                    break;
+                }
+                num++;
+            }
+            wrSubscribedEnties.RemoveAt(num);
+            
+            if (target!= null)
+            {
+                RObject orCreateObject = RObjectManager.Instance.GetOrCreateObject(target);
+                orCreateObject.GetEventSystem().Unregister(eventName, referenceId);
+            }
+        }
+        
+        public void Unregister(int hash, int id)
+        {
+            int num = 0;
+            while (true)
+            {
+                if (num >= wrEntries.size)
+                {
+                    return;
+                }
+                var wrEntryInter = wrEntries[num];
+                if (wrEntryInter.Hash == hash && wrEntryInter.ID == id)
+                {
+                    break;
+                }
+                num++;
+            }
+            if (currentlyTriggering == 0)
+            {
+                wrEntries.RemoveAt(num);
+            }
+            else
+            {
+                dirty = true;
+                var value = wrEntries[num];
+                value.Unregiser();
+                wrEntries[num] = value;
+            }
+        }
+        
+        public void Unregister<TResult>(GameObject target, int eventName, GenericEventWithResultHandler<TResult> handler)
+        {
+            int num = 0;
+            while (true)
+            {
+                if (num >= wrSubscribedEnties.size)
+                {
+                    return;
+                }
+                var wrSubscribedEntryInter = wrSubscribedEnties[num];
+                if (wrSubscribedEntryInter.Hash == eventName && wrSubscribedEntryInter.GO == target)
+                {
+                    if (wrSubscribedEntryInter is WRSubscribedEntry<TResult> wrSubscribedEntry && wrSubscribedEntry.handler == handler)
+                    {
+                        break;
+                    }
+                }
+                num++;
+            }
+            wrSubscribedEnties.RemoveAt(num);
+            
+            if (target!= null)
+            {
+                RObject orCreateObject = RObjectManager.Instance.GetOrCreateObject(target);
+                orCreateObject.GetEventSystem().Unregister(eventName, handler);
+            }
+        }
+        
+        public void Unregister<TResult>(int hash, GenericEventWithResultHandler<TResult> handler)
+        {
+            int num = 0;
+            while (true)
+            {
+                if (num >= wrEntries.size)
+                {
+                    return;
+                }
+                IWREntry wrEntryInter = wrEntries[num];
+                if (wrEntryInter.Hash == hash)
+                {
+                    if (wrEntryInter is WREntry<TResult> wrEntry && wrEntry.handler == handler)
+                    {
+                        break;
+                    }
+                }
+                num++;
+            }
+            if (currentlyTriggering == 0)
+            {
+                wrEntries.RemoveAt(num);
+            }
+            else
+            {
+                dirty = true;
+                var value = (WREntry<TResult>)wrEntries[num];
+                value.handler = null;
+                wrEntries[num] = value;
+            }
+        }
+        
+        #endregion
     }
 }

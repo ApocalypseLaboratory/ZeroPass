@@ -141,7 +141,7 @@ namespace ZeroPass
 
         private static void RecursiveBuildFullName(GameObject obj)
         {
-            if (!((Object)obj == (Object)null))
+            if (!(obj == null))
             {
                 RecursiveBuildFullName(obj.transform.parent.gameObject);
                 fullNameBuilder.Append("/").Append(obj.name);

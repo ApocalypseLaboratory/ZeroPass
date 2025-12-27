@@ -185,7 +185,7 @@ namespace ZeroPass
             if (Tags.Add(tag))
             {
                 dirtyTagBits = true;
-                Trigger((int)UtilHashes.TagsChanged, null);
+                Trigger((int)UtilHashes.TagsChanged, tag);
                 Game.Instance?.Trigger((int)UtilHashes.TagsChanged, (this, tag));
             }
             if (serialize)
@@ -201,7 +201,7 @@ namespace ZeroPass
                 dirtyTagBits = true;
                 serializedTags.Remove(tag);
                 
-                Trigger((int)UtilHashes.TagsChanged, null);
+                Trigger((int)UtilHashes.TagsChanged, tag);
                 Game.Instance?.Trigger((int)UtilHashes.TagsChanged, (this, tag));
             }
         }
@@ -274,7 +274,7 @@ namespace ZeroPass
         public override bool Equals(object o)
         {
             RPrefabID RPrefabID = o as RPrefabID;
-            return (Object)RPrefabID != (Object)null && PrefabTag == RPrefabID.PrefabTag;
+            return RPrefabID != null && PrefabTag == RPrefabID.PrefabTag;
         }
 
         public override int GetHashCode()
