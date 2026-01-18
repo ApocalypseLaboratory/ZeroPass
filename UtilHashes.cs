@@ -1,8 +1,8 @@
 ﻿namespace ZeroPass
 {
-    public enum UtilHashes
+    public enum UtilHashes : int
     {
-        ObjectDestroyed,
+        ObjectDestroyed = 1000,
         TargetLost,
         EffectAdded,
         EffectRemoved,
