@@ -20,7 +20,10 @@ namespace ZeroPass
                 if (_instance == null)
                 {
                     var gameObject = new GameObject(nameof(RObjectManager));
-                    DontDestroyOnLoad(gameObject);
+                    if (Application.isPlaying)
+                    {
+                        DontDestroyOnLoad(gameObject);
+                    }
                     _instance = gameObject.AddComponent<RObjectManager>();
                 }
 
