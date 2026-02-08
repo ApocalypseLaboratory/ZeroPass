@@ -184,21 +184,33 @@ namespace ZeroPass
 
         public int Subscribe(int hash, Action<object> handler)
         {
+            if (!Application.isPlaying)
+                return 0;
+            
             return obj.GetEventSystem().Subscribe(hash, handler);
         }
 
         public int Subscribe(GameObject target, int hash, Action<object> handler)
         {
+            if (!Application.isPlaying)
+                return 0;
+            
             return obj.GetEventSystem().Subscribe(target, hash, handler);
         }
 
         public int Subscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler)
         {
+            if (!Application.isPlaying)
+                return 0;
+            
             return obj.GetEventSystem().Subscribe(hash, handler);
         }
 
         public void Unsubscribe(int hash, Action<object> handler)
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (obj != null)
             {
                 obj.GetEventSystem().Unsubscribe(hash, handler);
@@ -207,16 +219,25 @@ namespace ZeroPass
 
         public void Unsubscribe(int id)
         {
+            if (!Application.isPlaying)
+                return;
+            
             obj.GetEventSystem().Unsubscribe(id);
         }
 
         public void Unsubscribe(GameObject target, int hash, Action<object> handler)
         {
+            if (!Application.isPlaying)
+                return;
+            
             obj.GetEventSystem().Unsubscribe(target, hash, handler);
         }
 
         public void Unsubscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler, bool suppressWarnings = false)
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (obj != null)
             {
                 obj.GetEventSystem().Unsubscribe(hash, handler, suppressWarnings);
@@ -225,6 +246,9 @@ namespace ZeroPass
 
         public void Trigger(int hash, object data = null)
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (obj != null && obj.hasEventSystem)
             {
                 obj.GetEventSystem().Trigger(base.gameObject, hash, data);
@@ -236,21 +260,33 @@ namespace ZeroPass
         public int Register<ComponentType, TResult>(int eventName,
             EventSystem.WRIntraObjectHandler<ComponentType, TResult> handler)
         {
+            if (!Application.isPlaying)
+                return 0;
+            
             return obj.GetEventSystem().Register(eventName, handler);
         }
         
         public int Register<TResult>(int eventName, EventSystem.GenericEventWithResultHandler<TResult> handler)
         {
+            if (!Application.isPlaying)
+                return 0;
+            
             return obj.GetEventSystem().Register(eventName, handler);
         }
 
         public int Register<TResult>(GameObject target, int eventName, EventSystem.GenericEventWithResultHandler<TResult> handler)
         {
+            if (!Application.isPlaying)
+                return 0;
+            
             return obj.GetEventSystem().Register(target, eventName, handler);
         }
 
         public void Unregister(int eventName, int subscribeHandle, bool suppressWarnings = false)
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (obj != null)
             {
                 obj.GetEventSystem().Unregister(eventName, subscribeHandle, suppressWarnings);
@@ -259,6 +295,9 @@ namespace ZeroPass
 
         public void Unregister<TResult>(int hash, EventSystem.GenericEventWithResultHandler<TResult> handler)
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (obj != null)
             {
                 obj.GetEventSystem().Unregister(hash, handler);
@@ -267,6 +306,9 @@ namespace ZeroPass
 
         public void Unregister<TResult>(GameObject target, int eventName, EventSystem.GenericEventWithResultHandler<TResult> handler)
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (obj != null)
             {
                 obj.GetEventSystem().Unregister(target, eventName, handler);
@@ -275,6 +317,9 @@ namespace ZeroPass
         
         public void Unregister<ComponentType, TResult>(int hash, EventSystem.WRIntraObjectHandler<ComponentType, TResult> handler, bool suppressWarnings = false)
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (obj != null)
             {
                 obj.GetEventSystem().Unregister(hash, handler, suppressWarnings);
@@ -283,6 +328,9 @@ namespace ZeroPass
 
         public void EventWithResult<ComponentType, TResult>(int hash, ref TResult result, params object[] args)
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (obj != null && obj.hasEventSystem)
             {
                 obj.GetEventSystem().EventWithResult<ComponentType, TResult>(base.gameObject, hash, ref result, args);
@@ -291,6 +339,9 @@ namespace ZeroPass
 
         public void EventWithResult<TResult>(int hash, ref TResult result, params object[] args)
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (obj != null && obj.hasEventSystem)
             {
                 obj.GetEventSystem().EventWithResult(hash, ref result, args);
